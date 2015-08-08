@@ -1,0 +1,28 @@
+{
+    "name": "ildanno/telegram-bot-php-client",
+    "description": "PHP client for Telegram Bot API",
+    "type": "PHP",
+    "authors": [
+        {
+            "name": "Daniele Contini",
+            "email": "dannowonder@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "zendframework/zend-http": "^2.5@dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Telegram\\Bot\\Client\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TelegramTest\\Bot\\Client\\": "test/"
+        }
+    }
+}
