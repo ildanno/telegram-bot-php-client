@@ -27,6 +27,8 @@ class User implements UserInterface
     protected $username;
 
     /**
+     * Unique identifier for this user or bot
+     *
      * @return int
      */
     public function getId()
@@ -45,6 +47,8 @@ class User implements UserInterface
     }
 
     /**
+     * User‘s or bot’s first name
+     *
      * @return string
      */
     public function getFirstName()
@@ -63,6 +67,8 @@ class User implements UserInterface
     }
 
     /**
+     * Optional. User‘s or bot’s last name
+     *
      * @return string
      */
     public function getLastName()
@@ -89,6 +95,8 @@ class User implements UserInterface
     }
 
     /**
+     * Optional. User‘s or bot’s username
+     *
      * @param string $username
      * @return User
      */
