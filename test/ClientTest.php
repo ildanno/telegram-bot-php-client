@@ -101,4 +101,54 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1439219709, $message->getDate()->getTimestamp());
         $this->assertEquals('My message', $message->getText());
     }
+
+    public function testForwardMessage()
+    {
+        /** @var HttpClient $httpClient */
+        $httpClient = $this->prophesize('Zend\Http\Client');
+
+        $botClient = new Client();
+        $botClient->setHttpClient($httpClient->reveal());
+
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->setContent(json_encode([
+            'ok' => true,
+            'result' => [
+                'message_id' => 1411,
+                'from' => [
+                    'id' => 516,
+                    'first_name' => 'AbotherTestingBot',
+                    'username' => 'AbotherTestingBot'
+                ],
+                'chat' => [
+                    'id' => 31054985,
+                    'first_name' => 'Same Awesome',
+                    'last_name' => 'Developer',
+                    'username' => 'morecoolness'
+                ],
+                'date' => 1439219731,
+                'forward_from' => [
+                    'id' => 506,
+                    'first_name' => 'TestinBot',
+                    'username' => 'TestingBot'
+                ],
+                'forward_date' => 1439219709,
+            ]
+        ]));
+
+        /** @var MethodProphecy $m */
+        $m = $httpClient->send(Argument::any());
+        $m->shouldBeCalled()->willReturn($response);
+
+        $message = $botClient->forwardMessage(31054985, 506, 1410);
+
+        $this->assertTrue($message instanceof MessageInterface);
+
+        $this->assertEquals(1411, $message->getMessageId());
+        $this->assertEquals(516, $message->getFrom()->getId());
+        $this->assertEquals(1439219731, $message->getDate()->getTimestamp());
+        $this->assertEquals(506, $message->getForwardFrom()->getId());
+        $this->assertEquals(1439219709, $message->getForwardDate()->getTimestamp());
+    }
 }
