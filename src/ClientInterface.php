@@ -4,6 +4,7 @@
 namespace Telegram\Bot\Client;
 
 
+use Telegram\Bot\Client\Model\InputFileInterface;
 use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\UserInterface;
 
@@ -42,4 +43,17 @@ interface ClientInterface
      * @see https://core.telegram.org/bots/api#forwardmessage
      */
     public function forwardMessage($chatId, $fromChatId, $messageId);
+
+    /**
+     * Use this method to send photos. On success, the sent Message is returned.
+     *
+     * @param int $chatId Unique identifier for the message recipient — User or GroupChat id
+     * @param string|InputFileInterface $photo Photo to send. You can either pass a file_id as String to resend a photo that is already on the Telegram servers, or upload a new photo using multipart/form-data.
+     * @param array $options Array of optional values. Valid options are:
+     * - string caption Photo caption (may also be used when resending photos by file_id).
+     * - int reply_to_message_id If the message is a reply, ID of the original message.
+     * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
+     * @return mixed
+     */
+    public function sendPhoto($chatId, $photo, $options = []);
 }

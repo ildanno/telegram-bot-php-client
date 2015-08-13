@@ -4,10 +4,10 @@
 namespace Telegram\Bot\Client;
 
 
-use DateTime;
-use Telegram\Bot\Client\Hydrator\Strategy\AbstractClassMethodsStrategy;
+use Telegram\Bot\Client\Hydrator\MessageHydrator;
 use Telegram\Bot\Client\Hydrator\Strategy\UnixTimeHydratorStrategy;
 use Telegram\Bot\Client\Hydrator\Strategy\UserHydratorStrategy;
+use Telegram\Bot\Client\Model\InputFileInterface;
 use Telegram\Bot\Client\Model\Message;
 use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\User;
@@ -138,9 +138,7 @@ class Client implements ClientInterface
 
         $message = new Message();
 
-        $hydrator = new ClassMethods();
-        $hydrator->addStrategy('from', new UserHydratorStrategy());
-        $hydrator->addStrategy('date', new UnixTimeHydratorStrategy());
+        $hydrator = new MessageHydrator();
         $hydrator->hydrate($result, $message);
 
         return $message;
@@ -159,7 +157,7 @@ class Client implements ClientInterface
     public function forwardMessage($chatId, $fromChatId, $messageId)
     {
         $request = new Request();
-        $request->setUri($this->getEndpoint() . 'sendMessage');
+        $request->setUri($this->getEndpoint() . 'forwardMessage');
         $request->setMethod(Request::METHOD_POST);
 
         $request->getPost()->set('chat_id', $chatId);
@@ -179,11 +177,57 @@ class Client implements ClientInterface
 
         $message = new Message();
 
-        $hydrator = new ClassMethods();
-        $hydrator->addStrategy('from', new UserHydratorStrategy());
-        $hydrator->addStrategy('date', new UnixTimeHydratorStrategy());
-        $hydrator->addStrategy('forward_from', new UserHydratorStrategy());
-        $hydrator->addStrategy('forward_date', new UnixTimeHydratorStrategy());
+        $hydrator = new MessageHydrator();
+        $hydrator->hydrate($result, $message);
+
+        return $message;
+    }
+
+    /**
+     * Use this method to send photos. On success, the sent Message is returned.
+     *
+     * @param int $chatId Unique identifier for the message recipient — User or GroupChat id
+     * @param string|InputFileInterface $photo Photo to send. You can either pass a file_id as String to resend a photo that is already on the Telegram servers, or upload a new photo using multipart/form-data.
+     * @param array $options Array of optional values. Valid options are:
+     * - string caption Photo caption (may also be used when resending photos by file_id).
+     * - int reply_to_message_id If the message is a reply, ID of the original message.
+     * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
+     * @return MessageInterface
+     * @throws \Exception
+     */
+    public function sendPhoto($chatId, $photo, $options = [])
+    {
+        $request = new Request();
+        $request->setUri($this->getEndpoint() . 'sendPhoto');
+        $request->setMethod(Request::METHOD_POST);
+
+        $request->getPost()->set('chat_id', $chatId);
+        $request->getPost()->set('photo', $photo);
+
+        if (array_key_exists('caption', $options)) {
+            $request->getPost()->set('caption', $options['caption']);
+        }
+
+        if (array_key_exists('reply_to_message_id', $options)) {
+            $request->getPost()->set('reply_to_message_id', intval($options['reply_to_message_id']));
+        }
+
+        // TODO implement reply markup
+
+        $client = $this->getHttpClient();
+        $response = $client->send($request);
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if (!$responseBody['ok']) {
+            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+        }
+
+        $result = $responseBody['result'];
+
+        $message = new Message();
+
+        $hydrator = new MessageHydrator();
         $hydrator->hydrate($result, $message);
 
         return $message;
