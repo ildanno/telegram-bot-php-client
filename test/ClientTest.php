@@ -9,6 +9,7 @@ use Prophecy\Prophecy\MethodProphecy;
 use Telegram\Bot\Client\Client;
 use Telegram\Bot\Client\ClientInterface;
 use Telegram\Bot\Client\Model\AudioInterface;
+use Telegram\Bot\Client\Model\DocumentInterface;
 use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\PhotoSizeInterface;
 use Telegram\Bot\Client\Model\UserInterface;
@@ -281,5 +282,62 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($message->getAudio() instanceof AudioInterface);
 
         $this->assertEquals('AwADAABDGgADFM2vBF_fTf7Hsi4XAg', $message->getAudio()->getFileId());
+    }
+
+    public function testSendDocument()
+    {
+        /** @var HttpClient $httpClient */
+        $httpClient = $this->prophesize('Zend\Http\Client');
+
+        $botClient = new Client();
+        $botClient->setHttpClient($httpClient->reveal());
+
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->setContent(json_encode([
+
+            'ok' => true,
+            'result' => [
+                'message_id' => 16,
+                'from' => [
+                    'id' => 506,
+                    'first_name' => 'TestinBot',
+                    'username' => 'TestingBot'
+                ],
+                'chat' => [
+                    'id' => 31051985,
+                    'first_name' => 'Awesome',
+                    'last_name' => 'Developer',
+                    'username' => 'somecoolness'
+                ],
+                'date' => 1439556594,
+                'document' => [
+                    'file_id' => 'AwADAABDGgADFM2vBF_fTf7Hsi4XAg',
+                    'thumb' => [
+                        'file_id' => 'AwADAABDGgADFM2vBF_fTf7Hsi4XAg-xw4f44BPflJkD3im73bNY44uI',
+                        'file_size' => 493,
+                        'width' => 90,
+                        'height' => 23
+                    ],
+                    'file_name' => 'ok.pdf',
+                    'mime_type' => 'application/x-pdf',
+                    'file_size' => 13534
+                ]
+            ]
+        ]));
+
+        /** @var MethodProphecy $m */
+        $m = $httpClient->send(Argument::any());
+        $m->shouldBeCalled()->willReturn($response);
+
+        $message = $botClient->sendDocument(31051985, 'AwADAABDGgADFM2vBF_fTf7Hsi4XAg');
+
+        $this->assertTrue($message instanceof MessageInterface);
+
+        $this->assertEquals(31051985, $message->getChat()->getId());
+        $this->assertTrue($message->getDocument() instanceof DocumentInterface);
+
+        $this->assertEquals('AwADAABDGgADFM2vBF_fTf7Hsi4XAg', $message->getDocument()->getFileId());
+        $this->assertEquals('AwADAABDGgADFM2vBF_fTf7Hsi4XAg-xw4f44BPflJkD3im73bNY44uI', $message->getDocument()->getThumb()->getFileId());
     }
 }
