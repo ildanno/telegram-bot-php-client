@@ -4,6 +4,7 @@
 namespace Telegram\Bot\Client\Hydrator;
 
 
+use Telegram\Bot\Client\Hydrator\Strategy\AudioStrategy;
 use Telegram\Bot\Client\Hydrator\Strategy\PhotoArrayStrategy;
 use Telegram\Bot\Client\Hydrator\Strategy\UnixTimeHydratorStrategy;
 use Telegram\Bot\Client\Hydrator\Strategy\UserHydratorStrategy;
@@ -25,6 +26,7 @@ class MessageHydrator extends ClassMethods
         $this->addStrategy('forward_from', new UserHydratorStrategy());
         $this->addStrategy('forward_date', new UnixTimeHydratorStrategy());
         $this->addStrategy('photo', new PhotoArrayStrategy());
+        $this->addStrategy('audio', new AudioStrategy());
     }
 
 }

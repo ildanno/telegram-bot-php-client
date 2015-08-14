@@ -8,6 +8,7 @@ use Prophecy\Argument;
 use Prophecy\Prophecy\MethodProphecy;
 use Telegram\Bot\Client\Client;
 use Telegram\Bot\Client\ClientInterface;
+use Telegram\Bot\Client\Model\AudioInterface;
 use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\PhotoSizeInterface;
 use Telegram\Bot\Client\Model\UserInterface;
@@ -169,16 +170,15 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             'result' => [
                 'message_id' => 12,
                 'from' => [
-                    'id' => 5061985,
-                    'first_name' => 'Adan',
-                    'last_name' => 'Burn',
-                    'username' => 'myuser'
+                    'id' => 506,
+                    'first_name' => 'TestinBot',
+                    'username' => 'TestingBot'
                 ],
                 'chat' => [
                     'id' => 31051985,
-                    'first_name' => 'Cherry',
-                    'last_name' => 'Doll',
-                    'username' => 'myfriend'
+                    'first_name' => 'Awesome',
+                    'last_name' => 'Developer',
+                    'username' => 'somecoolness'
                 ],
                 'date' => 1439395291,
                 'photo' => [
@@ -231,5 +231,55 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue($photoSize instanceof PhotoSizeInterface);
             $this->assertEquals('4u4DB44DXKuxuxfNrwRSs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI', $photoSize->getFileId());
         }
+    }
+
+    public function testSendAudio()
+    {
+        /** @var HttpClient $httpClient */
+        $httpClient = $this->prophesize('Zend\Http\Client');
+
+        $botClient = new Client();
+        $botClient->setHttpClient($httpClient->reveal());
+
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->setContent(json_encode([
+
+            'ok' => true,
+            'result' => [
+                'message_id' => 16,
+                'from' => [
+                    'id' => 506,
+                    'first_name' => 'TestinBot',
+                    'username' => 'TestingBot'
+                ],
+                'chat' => [
+                    'id' => 31051985,
+                    'first_name' => 'Awesome',
+                    'last_name' => 'Developer',
+                    'username' => 'somecoolness'
+                ],
+                'date' => 1439556594,
+                'audio' => [
+                    'duration' => 2,
+                    'mime_type' => 'audio/mpeg',
+                    'file_id' => 'AwADAABDGgADFM2vBF_fTf7Hsi4XAg',
+                    'file_size' => 13534
+                ]
+            ]
+        ]));
+
+        /** @var MethodProphecy $m */
+        $m = $httpClient->send(Argument::any());
+        $m->shouldBeCalled()->willReturn($response);
+
+        $message = $botClient->sendAudio(31051985, 'AwADAABDGgADFM2vBF_fTf7Hsi4XAg');
+
+        $this->assertTrue($message instanceof MessageInterface);
+
+        $this->assertEquals(31051985, $message->getChat()->getId());
+        $this->assertTrue($message->getAudio() instanceof AudioInterface);
+
+        $this->assertEquals('AwADAABDGgADFM2vBF_fTf7Hsi4XAg', $message->getAudio()->getFileId());
     }
 }

@@ -56,4 +56,19 @@ interface ClientInterface
      * @return mixed
      */
     public function sendPhoto($chatId, $photo, $options = []);
+
+    /**
+     * Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message.
+     * For this to work, your audio must be in an .ogg file encoded with OPUS (other formats may be sent as Document).
+     * On success, the sent Message is returned. Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
+     *
+     * @param int $chatId Unique identifier for the message recipient — User or GroupChat id
+     * @param InputFileInterface|string $audio Audio file to send. You can either pass a file_id as String to resend an audio that is already on the Telegram servers, or upload a new audio file using multipart/form-data.
+     * @param array $options Array of optional values. Valid options are:
+     * - int duration Duration of sent audio in seconds.
+     * - int reply_to_message_id If the message is a reply, ID of the original message.
+     * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
+     * @return mixed
+     */
+    public function sendAudio($chatId, $audio, $options = []);
 }

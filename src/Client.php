@@ -5,8 +5,6 @@ namespace Telegram\Bot\Client;
 
 
 use Telegram\Bot\Client\Hydrator\MessageHydrator;
-use Telegram\Bot\Client\Hydrator\Strategy\UnixTimeHydratorStrategy;
-use Telegram\Bot\Client\Hydrator\Strategy\UserHydratorStrategy;
 use Telegram\Bot\Client\Model\InputFileInterface;
 use Telegram\Bot\Client\Model\Message;
 use Telegram\Bot\Client\Model\MessageInterface;
@@ -115,15 +113,12 @@ class Client implements ClientInterface
         $request->getPost()->set('chat_id', $chatId);
         $request->getPost()->set('text', $text);
 
-        if (array_key_exists('disable_web_page_preview', $options)) {
-            $request->getPost()->set('disable_web_page_preview', boolval($options['disable_web_page_preview']));
+        $allowedOptions = ['disable_web_page_preview', 'reply_to_message_id', 'reply_markup'];
+        foreach ($options as $option) {
+            if (array_key_exists($option, $allowedOptions)) {
+                $request->getPost()->set($option, $options[$option]);
+            }
         }
-
-        if (array_key_exists('reply_to_message_id', $options)) {
-            $request->getPost()->set('reply_to_message_id', intval($options['reply_to_message_id']));
-        }
-
-        // TODO implement reply markup
 
         $client = $this->getHttpClient();
         $response = $client->send($request);
@@ -204,15 +199,61 @@ class Client implements ClientInterface
         $request->getPost()->set('chat_id', $chatId);
         $request->getPost()->set('photo', $photo);
 
-        if (array_key_exists('caption', $options)) {
-            $request->getPost()->set('caption', $options['caption']);
+        $allowedOptions = ['duration', 'reply_to_message_id', 'reply_markup'];
+        foreach ($options as $option) {
+            if (array_key_exists($option, $allowedOptions)) {
+                $request->getPost()->set($option, $options[$option]);
+            }
         }
 
-        if (array_key_exists('reply_to_message_id', $options)) {
-            $request->getPost()->set('reply_to_message_id', intval($options['reply_to_message_id']));
+        $client = $this->getHttpClient();
+        $response = $client->send($request);
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if (!$responseBody['ok']) {
+            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
-        // TODO implement reply markup
+        $result = $responseBody['result'];
+
+        $message = new Message();
+
+        $hydrator = new MessageHydrator();
+        $hydrator->hydrate($result, $message);
+
+        return $message;
+    }
+
+    /**
+     * Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message.
+     * For this to work, your audio must be in an .ogg file encoded with OPUS (other formats may be sent as Document).
+     * On success, the sent Message is returned. Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
+     *
+     * @param int $chatId Unique identifier for the message recipient — User or GroupChat id
+     * @param InputFileInterface|string $audio Audio file to send. You can either pass a file_id as String to resend an audio that is already on the Telegram servers, or upload a new audio file using multipart/form-data.
+     * @param array $options Array of optional values. Valid options are:
+     * - int duration Duration of sent audio in seconds.
+     * - int reply_to_message_id If the message is a reply, ID of the original message.
+     * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
+     * @return MessageInterface
+     * @throws \Exception
+     */
+    public function sendAudio($chatId, $audio, $options = [])
+    {
+        $request = new Request();
+        $request->setUri($this->getEndpoint() . 'sendAudio');
+        $request->setMethod(Request::METHOD_POST);
+
+        $request->getPost()->set('chat_id', $chatId);
+        $request->getPost()->set('audio', $audio);
+
+        $allowedOptions = ['duration', 'reply_to_message_id', 'reply_markup'];
+        foreach ($options as $option) {
+            if (array_key_exists($option, $allowedOptions)) {
+                $request->getPost()->set($option, $options[$option]);
+            }
+        }
 
         $client = $this->getHttpClient();
         $response = $client->send($request);
