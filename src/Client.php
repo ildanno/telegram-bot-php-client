@@ -199,7 +199,7 @@ class Client implements ClientInterface
         $request->getPost()->set('chat_id', $chatId);
         $request->getPost()->set('photo', $photo);
 
-        $allowedOptions = ['duration', 'reply_to_message_id', 'reply_markup'];
+        $allowedOptions = ['caption', 'reply_to_message_id', 'reply_markup'];
         foreach ($options as $option) {
             if (array_key_exists($option, $allowedOptions)) {
                 $request->getPost()->set($option, $options[$option]);
@@ -341,6 +341,56 @@ class Client implements ClientInterface
         $request->getPost()->set('sticker', $sticker);
 
         $allowedOptions = ['reply_to_message_id', 'reply_markup'];
+        foreach ($options as $option) {
+            if (array_key_exists($option, $allowedOptions)) {
+                $request->getPost()->set($option, $options[$option]);
+            }
+        }
+
+        $client = $this->getHttpClient();
+        $response = $client->send($request);
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if (!$responseBody['ok']) {
+            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+        }
+
+        $result = $responseBody['result'];
+
+        $message = new Message();
+
+        $hydrator = new MessageHydrator();
+        $hydrator->hydrate($result, $message);
+
+        return $message;
+    }
+
+    /**
+     * Use this method to send video files, Telegram clients support mp4 videos (other formats may be sent as Document).
+     * On success, the sent Message is returned.
+     * Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
+     *
+     * @param int $chatId Unique identifier for the message recipient — User or GroupChat id
+     * @param InputFileInterface|string $video Video to send. You can either pass a file_id as String to resend a video that is already on the Telegram servers, or upload a new video file using multipart/form-data.
+     * @param array $options Array of optional values. Valid options are:
+     * - int duration Duration of sent video in seconds.
+     * - string caption Video caption (may also be used when resending videos by file_id).
+     * - int reply_to_message_id If the message is a reply, ID of the original message.
+     * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
+     * @return MessageInterface
+     * @throws \Exception
+     */
+    public function sendVideo($chatId, $video, $options = [])
+    {
+        $request = new Request();
+        $request->setUri($this->getEndpoint() . 'sendVideo');
+        $request->setMethod(Request::METHOD_POST);
+
+        $request->getPost()->set('chat_id', $chatId);
+        $request->getPost()->set('video', $video);
+
+        $allowedOptions = ['duration', 'caption', 'reply_to_message_id', 'reply_markup'];
         foreach ($options as $option) {
             if (array_key_exists($option, $allowedOptions)) {
                 $request->getPost()->set($option, $options[$option]);

@@ -14,6 +14,7 @@ use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\PhotoSizeInterface;
 use Telegram\Bot\Client\Model\StickerInterface;
 use Telegram\Bot\Client\Model\UserInterface;
+use Telegram\Bot\Client\Model\VideoInterface;
 use Zend\Http\Client as HttpClient;
 use Zend\Http\Response;
 
@@ -397,5 +398,64 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('AwADADABGgADFM2vBF_fTf7Hsi4XAg', $message->getSticker()->getFileId());
         $this->assertEquals('AwADADABGgADFM2vBF_fTf7Hsi4XAg-xw4f44BPflJkD3im73bNY44uI', $message->getSticker()->getThumb()->getFileId());
+    }
+
+    public function testSendVideo()
+    {
+        /** @var HttpClient $httpClient */
+        $httpClient = $this->prophesize('Zend\Http\Client');
+
+        $botClient = new Client();
+        $botClient->setHttpClient($httpClient->reveal());
+
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->setContent(json_encode([
+
+            'ok' => true,
+            'result' => [
+                'message_id' => 16,
+                'from' => [
+                    'id' => 506,
+                    'first_name' => 'TestinBot',
+                    'username' => 'TestingBot'
+                ],
+                'chat' => [
+                    'id' => 31051985,
+                    'first_name' => 'Awesome',
+                    'last_name' => 'Developer',
+                    'username' => 'somecoolness'
+                ],
+                'date' => 1439556594,
+                'video' => [
+                    'file_id' => 'AwADADABGgADFM2vBF_fTf7Hsi4XAg',
+                    'width' => 390,
+                    'height' => 423,
+                    'thumb' => [
+                        'file_id' => 'AwADADABGgADFM2vBF_fTf7Hsi4XAg-xw4f44BPflJkD3im73bNY44uI',
+                        'file_size' => 493,
+                        'width' => 90,
+                        'height' => 23,
+                    ],
+                    'file_size' => 17534,
+                    'duration' => 2,
+                    'mime_type' => 'video/mpeg4',
+                ]
+            ]
+        ]));
+
+        /** @var MethodProphecy $m */
+        $m = $httpClient->send(Argument::any());
+        $m->shouldBeCalled()->willReturn($response);
+
+        $message = $botClient->sendVideo(31051985, 'AwADADABGgADFM2vBF_fTf7Hsi4XAg');
+
+        $this->assertTrue($message instanceof MessageInterface);
+
+        $this->assertEquals(31051985, $message->getChat()->getId());
+        $this->assertTrue($message->getVideo() instanceof VideoInterface);
+
+        $this->assertEquals('AwADADABGgADFM2vBF_fTf7Hsi4XAg', $message->getVideo()->getFileId());
+        $this->assertEquals('AwADADABGgADFM2vBF_fTf7Hsi4XAg-xw4f44BPflJkD3im73bNY44uI', $message->getVideo()->getThumb()->getFileId());
     }
 }
