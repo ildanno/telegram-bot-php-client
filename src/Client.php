@@ -319,4 +319,50 @@ class Client implements ClientInterface
 
         return $message;
     }
+
+    /**
+     * Use this method to send .webp stickers. On success, the sent Message is returned.
+     *
+     * @param int $chatId Unique identifier for the message recipient — User or GroupChat id
+     * @param InputFileInterface|string $sticker Sticker to send. You can either pass a file_id as String to resend a sticker that is already on the Telegram servers, or upload a new sticker using multipart/form-data.
+     * @param array $options Array of optional values. Valid options are:
+     * - int reply_to_message_id If the message is a reply, ID of the original message.
+     * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
+     * @return MessageInterface
+     * @throws \Exception
+     */
+    public function sendSticker($chatId, $sticker, $options = [])
+    {
+        $request = new Request();
+        $request->setUri($this->getEndpoint() . 'sendSticker');
+        $request->setMethod(Request::METHOD_POST);
+
+        $request->getPost()->set('chat_id', $chatId);
+        $request->getPost()->set('sticker', $sticker);
+
+        $allowedOptions = ['reply_to_message_id', 'reply_markup'];
+        foreach ($options as $option) {
+            if (array_key_exists($option, $allowedOptions)) {
+                $request->getPost()->set($option, $options[$option]);
+            }
+        }
+
+        $client = $this->getHttpClient();
+        $response = $client->send($request);
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if (!$responseBody['ok']) {
+            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+        }
+
+        $result = $responseBody['result'];
+
+        $message = new Message();
+
+        $hydrator = new MessageHydrator();
+        $hydrator->hydrate($result, $message);
+
+        return $message;
+    }
 }
