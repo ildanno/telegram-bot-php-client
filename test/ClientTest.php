@@ -471,7 +471,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $response = new Response();
         $response->setStatusCode(200);
         $response->setContent(json_encode([
-
             'ok' => true,
             'result' => [
                 'message_id' => 16,
@@ -507,5 +506,29 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(44.1234, $message->getLocation()->getLatitude());
         $this->assertEquals(12.3123, $message->getLocation()->getLongitude());
+    }
+
+    public function testSendChatAction()
+    {
+        /** @var HttpClient $httpClient */
+        $httpClient = $this->prophesize('Zend\Http\Client');
+
+        $botClient = new Client();
+        $botClient->setHttpClient($httpClient->reveal());
+
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->setContent(json_encode([
+            'ok' => true,
+            'result' => true,
+        ]));
+
+        /** @var MethodProphecy $m */
+        $m = $httpClient->send(Argument::any());
+        $m->shouldBeCalled()->willReturn($response);
+
+        $result = $botClient->sendChatAction(31051985, 'typing');
+
+        $this->assertTrue($result);
     }
 }
