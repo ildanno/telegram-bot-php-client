@@ -10,6 +10,7 @@ use Telegram\Bot\Client\Client;
 use Telegram\Bot\Client\ClientInterface;
 use Telegram\Bot\Client\Model\AudioInterface;
 use Telegram\Bot\Client\Model\DocumentInterface;
+use Telegram\Bot\Client\Model\LocationInterface;
 use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\PhotoSizeInterface;
 use Telegram\Bot\Client\Model\StickerInterface;
@@ -457,5 +458,54 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('AwADADABGgADFM2vBF_fTf7Hsi4XAg', $message->getVideo()->getFileId());
         $this->assertEquals('AwADADABGgADFM2vBF_fTf7Hsi4XAg-xw4f44BPflJkD3im73bNY44uI', $message->getVideo()->getThumb()->getFileId());
+    }
+
+    public function testSendLocation()
+    {
+        /** @var HttpClient $httpClient */
+        $httpClient = $this->prophesize('Zend\Http\Client');
+
+        $botClient = new Client();
+        $botClient->setHttpClient($httpClient->reveal());
+
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->setContent(json_encode([
+
+            'ok' => true,
+            'result' => [
+                'message_id' => 16,
+                'from' => [
+                    'id' => 506,
+                    'first_name' => 'TestinBot',
+                    'username' => 'TestingBot'
+                ],
+                'chat' => [
+                    'id' => 31051985,
+                    'first_name' => 'Awesome',
+                    'last_name' => 'Developer',
+                    'username' => 'somecoolness'
+                ],
+                'date' => 1439556594,
+                'location' => [
+                    'latitude' => 44.1234,
+                    'longitude' => 12.3123,
+                ]
+            ]
+        ]));
+
+        /** @var MethodProphecy $m */
+        $m = $httpClient->send(Argument::any());
+        $m->shouldBeCalled()->willReturn($response);
+
+        $message = $botClient->sendLocation(31051985, 44.1234, 12.3123);
+
+        $this->assertTrue($message instanceof MessageInterface);
+
+        $this->assertEquals(31051985, $message->getChat()->getId());
+        $this->assertTrue($message->getLocation() instanceof LocationInterface);
+
+        $this->assertEquals(44.1234, $message->getLocation()->getLatitude());
+        $this->assertEquals(12.3123, $message->getLocation()->getLongitude());
     }
 }

@@ -111,4 +111,17 @@ interface ClientInterface
      * @return MessageInterface
      */
     public function sendVideo($chatId, $video, $options = []);
+
+    /**
+     * Use this method to send point on the map. On success, the sent Message is returned.
+     *
+     * @param int $chatId Unique identifier for the message recipient — User or GroupChat id
+     * @param float $latitude Latitude of location
+     * @param float $longitude Longitude of location
+     * @param array $options Array of optional values. Valid options are:
+     * - int reply_to_message_id If the message is a reply, ID of the original message.
+     * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
+     * @return MessageInterface
+     */
+    public function sendLocation($chatId, $latitude, $longitude, $options = []);
 }

@@ -6,6 +6,7 @@ namespace Telegram\Bot\Client\Hydrator;
 
 use Telegram\Bot\Client\Hydrator\Strategy\AudioStrategy;
 use Telegram\Bot\Client\Hydrator\Strategy\DocumentStrategy;
+use Telegram\Bot\Client\Hydrator\Strategy\LocationStrategy;
 use Telegram\Bot\Client\Hydrator\Strategy\PhotoArrayStrategy;
 use Telegram\Bot\Client\Hydrator\Strategy\StickerStrategy;
 use Telegram\Bot\Client\Hydrator\Strategy\UnixTimeHydratorStrategy;
@@ -33,6 +34,7 @@ class MessageHydrator extends ClassMethods
         $this->addStrategy('document', new DocumentStrategy());
         $this->addStrategy('sticker', new StickerStrategy());
         $this->addStrategy('video', new VideoStrategy());
+        $this->addStrategy('location', new LocationStrategy());
     }
 
 }

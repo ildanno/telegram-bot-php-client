@@ -415,4 +415,52 @@ class Client implements ClientInterface
 
         return $message;
     }
+
+    /**
+     * Use this method to send point on the map. On success, the sent Message is returned.
+     *
+     * @param int $chatId Unique identifier for the message recipient — User or GroupChat id
+     * @param float $latitude Latitude of location
+     * @param float $longitude Longitude of location
+     * @param array $options Array of optional values. Valid options are:
+     * - int reply_to_message_id If the message is a reply, ID of the original message.
+     * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
+     * @return MessageInterface
+     * @throws \Exception
+     */
+    public function sendLocation($chatId, $latitude, $longitude, $options = [])
+    {
+        $request = new Request();
+        $request->setUri($this->getEndpoint() . 'sendVideo');
+        $request->setMethod(Request::METHOD_POST);
+
+        $request->getPost()->set('chat_id', $chatId);
+        $request->getPost()->set('latitude', $latitude);
+        $request->getPost()->set('longitude', $longitude);
+
+        $allowedOptions = ['reply_to_message_id', 'reply_markup'];
+        foreach ($options as $option) {
+            if (array_key_exists($option, $allowedOptions)) {
+                $request->getPost()->set($option, $options[$option]);
+            }
+        }
+
+        $client = $this->getHttpClient();
+        $response = $client->send($request);
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if (!$responseBody['ok']) {
+            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+        }
+
+        $result = $responseBody['result'];
+
+        $message = new Message();
+
+        $hydrator = new MessageHydrator();
+        $hydrator->hydrate($result, $message);
+
+        return $message;
+    }
 }
