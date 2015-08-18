@@ -4,11 +4,15 @@
 namespace Telegram\Bot\Client;
 
 
+use Exception;
 use Telegram\Bot\Client\Hydrator\MessageHydrator;
+use Telegram\Bot\Client\Hydrator\UpdateHydrator;
 use Telegram\Bot\Client\Hydrator\UserProfilePhotosHydrator;
 use Telegram\Bot\Client\Model\InputFileInterface;
 use Telegram\Bot\Client\Model\Message;
 use Telegram\Bot\Client\Model\MessageInterface;
+use Telegram\Bot\Client\Model\Update;
+use Telegram\Bot\Client\Model\UpdateInterface;
 use Telegram\Bot\Client\Model\User;
 use Telegram\Bot\Client\Model\UserInterface;
 use Telegram\Bot\Client\Model\UserProfilePhotos;
@@ -67,7 +71,7 @@ class Client implements ClientInterface
      * Returns basic information about the bot in form of a User object.
      *
      * @return UserInterface
-     * @throws \Exception
+     * @throws Exception
      * @see https://core.telegram.org/bots/api#getme
      */
     public function getMe()
@@ -82,7 +86,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -105,7 +109,7 @@ class Client implements ClientInterface
      * - int reply_to_message_id If the message is a reply, ID of the original message
      * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
      * @return MessageInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendMessage($chatId, $text, $options = [])
     {
@@ -129,7 +133,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -149,7 +153,7 @@ class Client implements ClientInterface
      * @param int $fromChatId Unique identifier for the chat where the original message was sent — User or GroupChat id
      * @param int $messageId Unique message identifier
      * @return MessageInterface
-     * @throws \Exception
+     * @throws Exception
      * @see https://core.telegram.org/bots/api#forwardmessage
      */
     public function forwardMessage($chatId, $fromChatId, $messageId)
@@ -168,7 +172,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -191,7 +195,7 @@ class Client implements ClientInterface
      * - int reply_to_message_id If the message is a reply, ID of the original message.
      * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
      * @return MessageInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendPhoto($chatId, $photo, $options = [])
     {
@@ -215,7 +219,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -240,7 +244,7 @@ class Client implements ClientInterface
      * - int reply_to_message_id If the message is a reply, ID of the original message.
      * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
      * @return MessageInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendAudio($chatId, $audio, $options = [])
     {
@@ -264,7 +268,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -286,7 +290,7 @@ class Client implements ClientInterface
      * - int reply_to_message_id If the message is a reply, ID of the original message.
      * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
      * @return MessageInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendDocument($chatId, $document, $options = [])
     {
@@ -310,7 +314,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -332,7 +336,7 @@ class Client implements ClientInterface
      * - int reply_to_message_id If the message is a reply, ID of the original message.
      * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
      * @return MessageInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendSticker($chatId, $sticker, $options = [])
     {
@@ -356,7 +360,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -382,7 +386,7 @@ class Client implements ClientInterface
      * - int reply_to_message_id If the message is a reply, ID of the original message.
      * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
      * @return MessageInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendVideo($chatId, $video, $options = [])
     {
@@ -406,7 +410,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -429,7 +433,7 @@ class Client implements ClientInterface
      * - int reply_to_message_id If the message is a reply, ID of the original message.
      * - ReplyKeyboardMarkup|ReplyKeyboardHide|ForceReply reply_markup Additional interface options. A JSON-serialized object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.
      * @return MessageInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendLocation($chatId, $latitude, $longitude, $options = [])
     {
@@ -454,7 +458,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -481,7 +485,7 @@ class Client implements ClientInterface
      * - 'upload_document' for general files
      * - 'find_location' for location data
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendChatAction($chatId, $action)
     {
@@ -498,7 +502,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -513,7 +517,7 @@ class Client implements ClientInterface
      * @param int $offset Sequential number of the first photo to be returned. By default, all photos are returned.
      * @param int $limit Limits the number of photos to be retrieved. Values between 1—100 are accepted. Defaults to 100.
      * @return UserProfilePhotosInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function getUserProfilePhotos($userId, $offset = null, $limit = 100)
     {
@@ -534,7 +538,7 @@ class Client implements ClientInterface
         $responseBody = json_decode($response->getBody(), true);
 
         if (!$responseBody['ok']) {
-            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
         }
 
         $result = $responseBody['result'];
@@ -545,5 +549,45 @@ class Client implements ClientInterface
         $hydrator->hydrate($result, $userProfilePhotos);
 
         return $userProfilePhotos;
+    }
+
+    /**
+     * Use this method to receive incoming updates using long polling. An Array of Update objects is returned.
+     *
+     * @param array $options Array of optional values. Valid options are:
+     * - int offset Identifier of the first update to be returned. Must be greater by one than the highest among the identifiers of previously received updates. By default, updates starting with the earliest unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id.
+     * - int limit Limits the number of updates to be retrieved. Values between 1—100 are accepted. Defaults to 100
+     * - int timeout Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling
+     * @return UpdateInterface[]
+     * @throws Exception
+     */
+    public function getUpdates($options = [])
+    {
+        $request = new Request();
+        $request->setUri($this->getEndpoint() . 'getUpdates');
+        $request->setMethod(Request::METHOD_GET);
+
+        $client = $this->getHttpClient();
+        $response = $client->send($request);
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if (!$responseBody['ok']) {
+            throw new Exception('Failed retrieving data: ' . json_encode($responseBody));
+        }
+
+        $result = $responseBody['result'];
+        $hydrator = new UpdateHydrator();
+
+        $updates = [];
+
+        foreach ($result as $updateData) {
+            $update = new Update();
+            $hydrator->hydrate($updateData, $update);
+
+            $updates[] = $update;
+        }
+
+        return $updates;
     }
 }

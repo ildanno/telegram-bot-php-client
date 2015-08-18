@@ -14,6 +14,7 @@ use Telegram\Bot\Client\Model\LocationInterface;
 use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\PhotoSizeInterface;
 use Telegram\Bot\Client\Model\StickerInterface;
+use Telegram\Bot\Client\Model\UpdateInterface;
 use Telegram\Bot\Client\Model\UserInterface;
 use Telegram\Bot\Client\Model\UserProfilePhotosInterface;
 use Telegram\Bot\Client\Model\VideoInterface;
@@ -634,5 +635,75 @@ class ClientTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($profilePhotoSize instanceof PhotoSizeInterface);
             }
         }
+    }
+
+    public function testGetUpdates()
+    {
+        /** @var HttpClient $httpClient */
+        $httpClient = $this->prophesize('Zend\Http\Client');
+
+        $botClient = new Client();
+        $botClient->setHttpClient($httpClient->reveal());
+
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->setContent(json_encode([
+            'ok' => true,
+            'result' => [
+                [
+                    'update_id' => 12345,
+                    'message' => [
+                        'message_id' => 1410,
+                        'from' => [
+                            'id' => 31051985,
+                            'first_name' => 'Awesome',
+                            'last_name' => 'Developer',
+                            'username' => 'somecoolness'
+                        ],
+                        'chat' => [
+                            'id' => 31051985,
+                            'first_name' => 'Awesome',
+                            'last_name' => 'Developer',
+                            'username' => 'somecoolness'
+                        ],
+                        'date' => 1439219709,
+                        'text' => 'My message'
+                    ],
+                ],
+                [
+                    'update_id' => 12345,
+                    'message' => [
+                        'message_id' => 2310,
+                        'from' => [
+                            'id' => 31051985,
+                            'first_name' => 'Awesome',
+                            'last_name' => 'Developer',
+                            'username' => 'somecoolness'
+                        ],
+                        'chat' => [
+                            'id' => 31051985,
+                            'first_name' => 'Awesome',
+                            'last_name' => 'Developer',
+                            'username' => 'somecoolness'
+                        ],
+                        'date' => 1439219719,
+                        'text' => 'Another message'
+                    ],
+                ],
+            ],
+        ]));
+
+        /** @var MethodProphecy $m */
+        $m = $httpClient->send(Argument::any());
+        $m->shouldBeCalled()->willReturn($response);
+
+        $updates = $botClient->getUpdates();
+
+        foreach ($updates as $update) {
+            $this->assertTrue($update instanceof UpdateInterface);
+        }
+
+        $this->assertEquals(1410, $updates[0]->getMessage()->getMessageId());
+        $this->assertEquals(2310, $updates[1]->getMessage()->getMessageId());
     }
 }
