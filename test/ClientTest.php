@@ -15,6 +15,7 @@ use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\PhotoSizeInterface;
 use Telegram\Bot\Client\Model\StickerInterface;
 use Telegram\Bot\Client\Model\UserInterface;
+use Telegram\Bot\Client\Model\UserProfilePhotosInterface;
 use Telegram\Bot\Client\Model\VideoInterface;
 use Zend\Http\Client as HttpClient;
 use Zend\Http\Response;
@@ -530,5 +531,108 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $result = $botClient->sendChatAction(31051985, 'typing');
 
         $this->assertTrue($result);
+    }
+
+    public function testGetUserProfilePhotos()
+    {
+        /** @var HttpClient $httpClient */
+        $httpClient = $this->prophesize('Zend\Http\Client');
+
+        $botClient = new Client();
+        $botClient->setHttpClient($httpClient->reveal());
+
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->setContent(json_encode([
+            'ok' => true,
+            'result' => [
+                'total_count' => 2,
+                'photos' => [
+                    [
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNrwRSs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 493,
+                            'width' => 90,
+                            'height' => 23
+                        ],
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNrwRSs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 4727,
+                            'width' => 320,
+                            'height' => 82
+                        ],
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNrwRSs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 23133,
+                            'width' => 800,
+                            'height' => 204
+                        ],
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNrwRSs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 42933,
+                            'width' => 1280,
+                            'height' => 327
+                        ],
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNrwRSs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 44311,
+                            'width' => 1596,
+                            'height' => 408
+                        ]
+                    ],
+                    [
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNisEBs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 493,
+                            'width' => 90,
+                            'height' => 23
+                        ],
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNisEBs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 4727,
+                            'width' => 320,
+                            'height' => 82
+                        ],
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNisEBs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 23133,
+                            'width' => 800,
+                            'height' => 204
+                        ],
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNisEBs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 42933,
+                            'width' => 1280,
+                            'height' => 327
+                        ],
+                        [
+                            'file_id' => '4u4DB44DXKuxuxfNisEBs3yKnCjH6-xw4f44BPflJkD3im73bNY44uI',
+                            'file_size' => 44311,
+                            'width' => 1596,
+                            'height' => 408
+                        ]
+                    ],
+                ],
+            ]
+        ]));
+
+        /** @var MethodProphecy $m */
+        $m = $httpClient->send(Argument::any());
+        $m->shouldBeCalled()->willReturn($response);
+
+        $userProfilePhotos = $botClient->getUserProfilePhotos(31051985);
+
+        $this->assertTrue($userProfilePhotos instanceof UserProfilePhotosInterface);
+
+        $this->assertEquals(2, $userProfilePhotos->getTotalCount());
+        $this->assertCount($userProfilePhotos->getTotalCount(), $userProfilePhotos->getPhotos());
+
+        foreach ($userProfilePhotos->getPhotos() as $profilePhoto) {
+            $this->assertNotCount(0, $profilePhoto);
+
+            foreach ($profilePhoto as $profilePhotoSize) {
+                $this->assertTrue($profilePhotoSize instanceof PhotoSizeInterface);
+            }
+        }
     }
 }

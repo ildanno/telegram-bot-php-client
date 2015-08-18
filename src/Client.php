@@ -5,11 +5,14 @@ namespace Telegram\Bot\Client;
 
 
 use Telegram\Bot\Client\Hydrator\MessageHydrator;
+use Telegram\Bot\Client\Hydrator\UserProfilePhotosHydrator;
 use Telegram\Bot\Client\Model\InputFileInterface;
 use Telegram\Bot\Client\Model\Message;
 use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\User;
 use Telegram\Bot\Client\Model\UserInterface;
+use Telegram\Bot\Client\Model\UserProfilePhotos;
+use Telegram\Bot\Client\Model\UserProfilePhotosInterface;
 use Zend\Http\Client as ZendClient;
 use Zend\Http\Request;
 use Zend\Stdlib\Hydrator\ClassMethods;
@@ -431,7 +434,7 @@ class Client implements ClientInterface
     public function sendLocation($chatId, $latitude, $longitude, $options = [])
     {
         $request = new Request();
-        $request->setUri($this->getEndpoint() . 'sendVideo');
+        $request->setUri($this->getEndpoint() . 'sendLocation');
         $request->setMethod(Request::METHOD_POST);
 
         $request->getPost()->set('chat_id', $chatId);
@@ -483,7 +486,7 @@ class Client implements ClientInterface
     public function sendChatAction($chatId, $action)
     {
         $request = new Request();
-        $request->setUri($this->getEndpoint() . 'sendVideo');
+        $request->setUri($this->getEndpoint() . 'sendChatAction');
         $request->setMethod(Request::METHOD_POST);
 
         $request->getPost()->set('chat_id', $chatId);
@@ -501,5 +504,46 @@ class Client implements ClientInterface
         $result = $responseBody['result'];
 
         return $result;
+    }
+
+    /**
+     * Use this method to get a list of profile pictures for a user. Returns a UserProfilePhotos object.
+     *
+     * @param int $userId Unique identifier of the target user
+     * @param int $offset Sequential number of the first photo to be returned. By default, all photos are returned.
+     * @param int $limit Limits the number of photos to be retrieved. Values between 1—100 are accepted. Defaults to 100.
+     * @return UserProfilePhotosInterface
+     * @throws \Exception
+     */
+    public function getUserProfilePhotos($userId, $offset = null, $limit = 100)
+    {
+        $request = new Request();
+        $request->setUri($this->getEndpoint() . 'getUserProfilePhotos');
+        $request->setMethod(Request::METHOD_POST);
+
+        $request->getPost()->set('user_id', $userId);
+        $request->getPost()->set('limit', $limit);
+
+        if ($offset) {
+            $request->getPost()->set('offset', $offset);
+        }
+
+        $client = $this->getHttpClient();
+        $response = $client->send($request);
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if (!$responseBody['ok']) {
+            throw new \Exception('Failed retrieving data: ' . json_encode($responseBody));
+        }
+
+        $result = $responseBody['result'];
+
+        $userProfilePhotos = new UserProfilePhotos();
+
+        $hydrator = new UserProfilePhotosHydrator();
+        $hydrator->hydrate($result, $userProfilePhotos);
+
+        return $userProfilePhotos;
     }
 }

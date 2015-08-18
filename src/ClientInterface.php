@@ -7,6 +7,7 @@ namespace Telegram\Bot\Client;
 use Telegram\Bot\Client\Model\InputFileInterface;
 use Telegram\Bot\Client\Model\MessageInterface;
 use Telegram\Bot\Client\Model\UserInterface;
+use Telegram\Bot\Client\Model\UserProfilePhotosInterface;
 
 interface ClientInterface
 {
@@ -141,4 +142,14 @@ interface ClientInterface
      * @return bool
      */
     public function sendChatAction($chatId, $action);
+
+    /**
+     * Use this method to get a list of profile pictures for a user. Returns a UserProfilePhotos object.
+     *
+     * @param int $userId Unique identifier of the target user
+     * @param int $offset Sequential number of the first photo to be returned. By default, all photos are returned.
+     * @param int $limit Limits the number of photos to be retrieved. Values between 1—100 are accepted. Defaults to 100.
+     * @return UserProfilePhotosInterface
+     */
+    public function getUserProfilePhotos($userId, $offset = null, $limit = 100);
 }
